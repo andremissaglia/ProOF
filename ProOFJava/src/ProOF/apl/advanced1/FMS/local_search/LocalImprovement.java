@@ -4,6 +4,8 @@
  */
 package ProOF.apl.advanced1.FMS.local_search;
 
+import ProOF.gen.operator.oLocalMove;
+import ProOF.apl.factorys.fTemperature;
 import ProOF.com.Linker.LinkerParameters;
 import ProOF.com.Linker.LinkerResults;
 import ProOF.com.Linker.LinkerApproaches;

@@ -5,8 +5,10 @@
  */
 package ProOF.apl.factorys;
 
+import ProOF.apl.UAV.mission.Blackmore.Blackmore_RFFO;
 import ProOF.apl.advanced2.problem.RFFO.GCIST_RFFO;
 import ProOF.apl.advanced2.problem.RFFO.MLCLSPwB_RFFO;
+import ProOF.apl.pog.method.RFFO.PPDCP.PPDCP_RFFO;
 import ProOF.apl.advanced2.FMS.RFFO.RFFOModel;
 import ProOF.apl.sample2.problem.RFFO.TSP_RFFO;
 import ProOF.com.language.Factory;
@@ -24,9 +26,11 @@ public class fRFFOModel extends Factory<RFFOModel>{
     @Override
     public RFFOModel build(int index) throws Exception {
         switch(index){
-            case 0: return new TSP_RFFO();
-            case 1: return new GCIST_RFFO();
+            case 0: return new GCIST_RFFO();
+            case 1: return new PPDCP_RFFO();
             case 2: return new MLCLSPwB_RFFO();
+            case 3: return new TSP_RFFO();
+            case 4: return new Blackmore_RFFO();
         }
         return null;
     }
