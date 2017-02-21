@@ -4,6 +4,7 @@
  */
 package ProOF.apl.UAV.problem.Blackmore;
 
+import ProOF.apl.UAV.problem.Blackmore.Graph.Graph;
 import ProOF.com.Linker.LinkerParameters;
 import ProOF.com.language.Factory;
 import ProOF.gen.operator.oCrossover;
@@ -14,6 +15,7 @@ import ProOF.gen.operator.oTrailPheromone;
 import ProOF.opt.abst.problem.meta.codification.Operator;
 import ProOF.utilities.uRouletteList;
 import ProOF.utilities.uUtil;
+import java.util.ArrayList;
 import java.util.Random;
 import jsc.util.Arrays;
 
@@ -40,6 +42,7 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
             case 4: return new TrailConst();    // Pheromone Trail
             case 5: return new TrailRnd();      // Pheromone Trail
             case 6: return new TrailCij();      // Pheromone Trail
+            case 7: return new TrailHeuristic();// Pheromone Trail
         }
         return null;
     }
@@ -122,40 +125,53 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
     }
 
     private abstract class TrailPheromone extends oTrailPheromone<BlackmoreProblem, BlackmoreCodification, BlackmoreObjective> {
-
         private double decay_rate;  //decay rate of the pheromone
-        private double Tij[][];     //pheromone trail
+        protected Graph pheromones;
         protected double Cij[][];   //Distance matrix
+        protected double distanceToTarget[];
         protected int N;
-
+        protected int W;
+        private boolean evolveWeights;
+        
         @Override
         public void parameters(LinkerParameters link) throws Exception {
             decay_rate = link.Dbl("decay rate", 0.5, 0.0, 1.0);
+            evolveWeights = link.Bool("Evolve Weights", false);
         }
 
-        protected abstract void fill(BlackmoreProblem prob, double Tij[][]);
+        protected abstract void fill(BlackmoreProblem prob);
 
         @Override
         public void initialize(BlackmoreProblem prob) throws Exception {
             this.N = prob.map.graph.vertexes.length;
-            Tij = new double[N][N];
+            this.W = prob.Waypoints() / 2;
+            this.pheromones = new Graph(N, W);
             Cij = new double[N][N];
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
                     Cij[i][j] = prob.map.graph.vertexes[i].costTo(prob.map.graph.vertexes[j]);
                 }
             }
-            fill(prob, Tij);
-            // Normalizes to [0,1]
-            double max = 0;
-            for (double array[] : Tij) {
-                max = uUtil.maxDbl(max, Arrays.max(array));
+            distanceToTarget = new double[N];
+            for(int i = 0; i < N; i++){
+                distanceToTarget[i] = prob.map.graph.vertexes[i].costTo(prob.map.graph.vertexes[prob.map.graph.target().id]);
             }
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    if (i != j) {
-                        Tij[i][j] /= max;
-                    }
+            for(GraphVertex v1: prob.map.graph.vertexes){
+                v1.adj.forEach((v2) -> {
+                    pheromones.addEdge(v1.id, v2.id);
+                });
+            }
+            fill(prob);
+            // Normalizes to [0,1]
+            double max = 0.0;
+            for(int v = 0; v < W; v++){
+                for(Graph.Edge e : pheromones.getEdges(v)){
+                    max = uUtil.maxDbl(max, e.getPheromone());
+                }
+            }
+            for(int v = 0; v < W; v++){
+                for(Graph.Edge e : pheromones.getEdges(v)){
+                    e.setPheromone(e.getPheromone()/max);
                 }
             }
 
@@ -173,47 +189,88 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
             java.util.Arrays.fill(visited, false);
 
             // First vertex is chosen
+            ant.path.clear();
             ant.path.ensureCapacity(N);
             ant.path.add(source);
+            
+            if(evolveWeights){
+                if (ant.weights == null){
+                    ant.weights = new ArrayList<>();
+                    
+                }
+                ant.weights.clear();
+                ant.weights.ensureCapacity(N-1);                
+            } else {
+                ant.weights = null;
+            }
+            
             visited[source] = true;
             int current = source;
 
             uRouletteList roulette = new uRouletteList(prob.rnd);
 
             double probability = 1.0;
-
+            
             // Build step by step a path following pheromone trail
             while (current != target) {
                 roulette.clear();
                 boolean dead_end = true;
-                for (GraphVertex j : prob.map.graph.vertexes[current].adj) {
-                    if (!visited[j.id]) {
-                        roulette.add(Tij[current][j.id], j.id);
+                for(Graph.Edge e: pheromones.getEdges(current)){
+                    if (!visited[e.getTo()]) {
+                        roulette.add(e.getPheromone(), e.getTo());
                         dead_end = false;
                     }
                 }
-                if (dead_end) {
+                if (dead_end || ant.path.size() == this.W) {
                     // Builds an infeasible path, which will be penalized
                     ant.path.add(target);
+                    
+                    if(evolveWeights){
+                        probability *= chooseWeight(ant, roulette, current, target);
+                    }
                     break;
                 }
                 // Select a candidate by roulette
-                current = roulette.roulette_wheel();
-                probability *= roulette.probability(current);
-                ant.path.add(current);
-                // Update the visited list
+                int next = roulette.roulette_wheel();
+                probability *= roulette.probability(next);
+                ant.path.add(next);
+                
+                // Choose weight
+                if(evolveWeights){
+                    probability *= chooseWeight(ant, roulette, current, next);
+                }
+                
+                // Update the visited 
+                current = next;
                 visited[current] = true;
             }
             return probability;
         }
-
+        private double chooseWeight(BlackmoreCodification ant, uRouletteList roulette, int i, int j){
+            roulette.clear();
+            Graph.Edge e = pheromones.get(i, j);
+            if(e == null){
+                ant.weights.add(0.0);
+                return 1;
+            }
+            for(int k = 0; k < W; k++){
+                roulette.add(e.getWeight(k), k);
+            }
+            int weight = roulette.roulette_wheel();
+            
+            ant.weights.add((double)weight);
+            return roulette.probability(weight);
+        }
         @Override
         public void evaporate(BlackmoreProblem prob) throws Exception {
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    Tij[i][j] = (1 - decay_rate) * Tij[i][j];
+            pheromones.forEach((e) -> {
+                e.setPheromone((1 - decay_rate) * e.getPheromone());
+                if(evolveWeights){
+                    for(int k = 0; k < W; k++){
+                        e.setWeight(k, (1 - decay_rate) *e.getWeight(k));
+                    }
                 }
-            }
+            });
         }
 
         @Override
@@ -221,7 +278,15 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
             for (int n = 1; n < ant.path.size(); n++) {
                 int i = ant.path.get(n - 1);
                 int j = ant.path.get(n);
-                Tij[i][j] += weight / obj.abs_value();
+                Graph.Edge e = pheromones.get(i, j);
+                double update_value = weight / obj.abs_value();
+                e.setPheromone(e.getPheromone()+update_value);
+                
+                // update weights phromones
+                if(evolveWeights){
+                    int k = (int) ant.weights.get(n-1).doubleValue();
+                    e.setWeight(k, e.getWeight(k)+update_value);
+                }                
             }
         }
     }
@@ -229,16 +294,15 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
     private class TrailConst extends TrailPheromone {
 
         @Override
-        protected void fill(BlackmoreProblem prob, double[][] Tij) {
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    if (i != j) {
-                        Tij[i][j] = 1.0;
-                    }
+        protected void fill(BlackmoreProblem prob) {
+            pheromones.forEach((e) -> {
+                e.setPheromone(1.0);
+                for(int k = 0; k < W; k++){
+                    e.setWeight(k, 1.0);
                 }
-            }
+            });
         }
-
+        
         @Override
         public String name() {
             return "Trail <-- 1/N";
@@ -249,14 +313,13 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
     private class TrailRnd extends TrailPheromone {
 
         @Override
-        protected void fill(BlackmoreProblem prob, double[][] Tij) {
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    if (i != j) {
-                        Tij[i][j] = prob.rnd.nextDouble();
-                    }
+        protected void fill(BlackmoreProblem prob) {
+            pheromones.forEach((e) -> {
+                e.setPheromone(prob.rnd.nextDouble());
+                for(int k = 0; k < W; k++){
+                    e.setWeight(k, prob.rnd.nextDouble());
                 }
-            }
+            });
         }
 
         @Override
@@ -274,14 +337,30 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
         }
 
         @Override
-        protected void fill(BlackmoreProblem prob, double[][] Tij) {
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    if (i != j) {
-                        Tij[i][j] = 1.0 / Cij[i][j];
-                    }
+        protected void fill(BlackmoreProblem prob) {
+            pheromones.forEach((e) -> {
+                e.setPheromone(1.0/ Cij[e.getFrom()][e.getTo()]);
+                for(int k = 0; k < W; k++){
+                    e.setWeight(k, 1.0);
                 }
-            }
+            });
+        }
+    }
+    private class TrailHeuristic extends TrailPheromone {
+
+        @Override
+        public String name() {
+            return "Trail <-- 1/(Cij + dtt)";
+        }
+        
+        @Override
+        protected void fill(BlackmoreProblem prob) {
+            pheromones.forEach((e) -> {
+                e.setPheromone(1.0/ (Cij[e.getFrom()][e.getTo()] + distanceToTarget[e.getTo()]));
+                for(int k = 0; k < W; k++){
+                    e.setWeight(k, 1.0);
+                }
+            });
         }
     }
 

@@ -331,5 +331,5 @@ public class BlackmoreProblem extends Problem<BestSol> implements BlackmoreSyste
         return vehicle;
     }
 
-    
+
 }

@@ -109,7 +109,7 @@ public class ProOF {
             //args = new String[]{"run", "F:\\zProOF\\client_space\\job_local\\waiting\\guji", "F:\\zProOF\\client_space\\input\\"};
             //args = new String[]{"run", "F:\\Dropbox\\ProOF\\ProOFClient\\work_space\\job_local\\finished\\skyl", "F:\\Dropbox\\ProOF\\ProOFClient\\work_space\\input\\"};
             
-            args = new String[]{"run", "../ProOFClient/work_space/job_local/finished/xihn", "../ProOFClient/work_space/input"};
+            args = new String[]{"run", "../work_space/job_local/finished/xdzg", "../work_space/input"};
             //args = new String[]{"run", "../ProOFClient/work_space/job_local/waiting/snxx", "../ProOFClient/work_space/input"};
             
 //args = new String[]{"run", "../ProOFClient/results/MILPC_T20/job_local/waiting/loyl", "../ProOFClient/results/MILPC_T20/input"};

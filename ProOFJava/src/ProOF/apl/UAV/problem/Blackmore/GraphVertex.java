@@ -41,6 +41,9 @@ public class GraphVertex {
         }
         return Double.POSITIVE_INFINITY;
     }
+    protected double euclidianDistance(GraphVertex v){
+        return point.distance(v.point);
+    }
     
     @Override
     public String toString() {
