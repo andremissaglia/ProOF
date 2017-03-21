@@ -164,6 +164,7 @@ public class BlackmoreProblem extends Problem<BestSol> implements BlackmoreSyste
             }
         }
         map.createGraph(this, inst, unc, delta.Delta());
+        map.graph.dijkstraToTarget();
     }
     
     

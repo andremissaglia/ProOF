@@ -51,7 +51,18 @@ public class GraphStruct {
         GraphVertex min = it.next();
         while(it.hasNext()){
             GraphVertex v = it.next();
-            if(v.cost<min.cost){
+            if(v.costFromSource<min.costFromSource){
+                min = v;
+            }
+        }
+        return min;
+    }
+    public GraphVertex minTarget(LinkedList<GraphVertex> Q){
+        Iterator<GraphVertex> it = Q.iterator();
+        GraphVertex min = it.next();
+        while(it.hasNext()){
+            GraphVertex v = it.next();
+            if(v.costToTarget<min.costToTarget){
                 min = v;
             }
         }
@@ -90,19 +101,19 @@ public class GraphStruct {
     public final GraphPath dijkstra(){
         LinkedList<GraphVertex> Q = new LinkedList<GraphVertex>();
         for (GraphVertex v : vertexes) {
-            v.cost = Double.MAX_VALUE;
+            v.costFromSource = Double.MAX_VALUE;
             v.from = null;
             Q.addLast(v);
         }
-        vertexes[0].cost = 0.0; //source
+        vertexes[0].costFromSource = 0.0; //source
         while(!Q.isEmpty()){
             GraphVertex u = min(Q);
             Q.remove(u);
             for(GraphVertex v : u.adj){
                 //if(Q.contains(v)){
-                    double dist = u.cost + u.point.distance(v.point);
-                    if(dist < v.cost){
-                        v.cost = dist;
+                    double dist = u.costFromSource + u.point.distance(v.point);
+                    if(dist < v.costFromSource){
+                        v.costFromSource = dist;
                         v.from = u;
                     }
                 //}
@@ -115,7 +126,29 @@ public class GraphStruct {
             Q.addFirst(u);
             u = u.from;
         }
-        return new GraphPath(vertexes[1].cost, Q);
+        return new GraphPath(vertexes[1].costFromSource, Q);
+    }
+    public final void dijkstraToTarget(){
+        LinkedList<GraphVertex> Q = new LinkedList<GraphVertex>();
+        for (GraphVertex v : vertexes) {
+            v.costToTarget = Double.MAX_VALUE;
+            v.to = null;
+            Q.addLast(v);
+        }
+        vertexes[1].costToTarget = 0.0; // target
+        while(!Q.isEmpty()){
+            GraphVertex u = minTarget(Q);
+            Q.remove(u);
+            for(GraphVertex v : u.adj){
+                //if(Q.contains(v)){
+                    double dist = u.costToTarget + u.point.distance(v.point);
+                    if(dist < v.costToTarget){
+                        v.costToTarget = dist;
+                        v.to = u;
+                    }
+                //}
+            }
+        }
     }
     private static boolean atBorder(GraphVertex from, GraphVertex to, ArrayList<GraphObstacle> obstacles) {
         if(from==to){

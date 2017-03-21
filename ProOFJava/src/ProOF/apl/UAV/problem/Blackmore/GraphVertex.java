@@ -17,8 +17,10 @@ public class GraphVertex {
     protected final GraphObstacle obs;
     protected final Point2D point;
     protected final ArrayList<GraphVertex> adj = new ArrayList<GraphVertex>();
-    protected double cost;
+    protected double costFromSource;
+    protected double costToTarget;
     protected GraphVertex from;
+    protected GraphVertex to;
 
     public GraphVertex(int id, GraphObstacle obs, Point2D point) {
         this.id = id;

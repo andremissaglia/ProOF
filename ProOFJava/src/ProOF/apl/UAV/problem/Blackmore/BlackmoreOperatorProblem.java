@@ -17,7 +17,6 @@ import ProOF.utilities.uRouletteList;
 import ProOF.utilities.uUtil;
 import java.util.ArrayList;
 import java.util.Random;
-import jsc.util.Arrays;
 
 /**
  *
@@ -43,6 +42,7 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
             case 5: return new TrailRnd();      // Pheromone Trail
             case 6: return new TrailCij();      // Pheromone Trail
             case 7: return new TrailHeuristic();// Pheromone Trail
+            case 8: return new RandomBestFirst();// Pheromone Trail
         }
         return null;
     }
@@ -60,6 +60,60 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
             int size = prob.rnd.nextInt(prob.map.graph.vertexes.length + 1);
             for (int i = 0; i < size; i++) {
                 ind.path.add(prob.rnd.nextInt(prob.map.graph.vertexes.length));
+            }
+        }
+    }
+    
+    private class RandomBestFirst extends oInitialization<BlackmoreProblem, BlackmoreCodification> {
+        @Override
+        public String name() {
+            return "Random Best First";
+        }
+        
+        @Override
+        public void initialize(BlackmoreProblem prob, BlackmoreCodification ind) throws Exception {
+            int source = prob.map.graph.source().id;
+            int target = prob.map.graph.target().id;
+            int W = prob.Waypoints();
+            
+            // List visited nodes
+            boolean visited[] = new boolean[prob.map.graph.vertexes.length];
+            java.util.Arrays.fill(visited, false);
+
+            // First vertex is chosen
+            ind.path.clear();
+            ind.path.add(source);
+            
+            visited[source] = true;
+            int current = source;
+
+            uRouletteList roulette = new uRouletteList(prob.rnd);
+            
+            // Build step by step a path following pheromone trail
+            while (current != target) {
+                roulette.clear();
+                boolean dead_end = true;
+                boolean toTarget = false;
+                for(GraphVertex v : prob.map.graph.vertexes[current].adj){
+                    if (!visited[v.id]) {
+                        if(v.id == target){
+                            toTarget = true;
+                            break;
+                        }
+                        roulette.add(1.0/ v.costToTarget, v.id);
+                        dead_end = false;
+                    }
+                }
+                
+                if (dead_end || toTarget || ind.path.size() == W) {
+                    ind.path.add(target);
+                    break;
+                }
+                // Select a candidate by roulette
+                current = roulette.roulette_wheel();
+                ind.path.add(current);
+                
+                visited[current] = true;
             }
         }
     }
@@ -154,7 +208,8 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
             }
             distanceToTarget = new double[N];
             for(int i = 0; i < N; i++){
-                distanceToTarget[i] = prob.map.graph.vertexes[i].costTo(prob.map.graph.vertexes[prob.map.graph.target().id]);
+                //distanceToTarget[i] = prob.map.graph.vertexes[i].costTo(prob.map.graph.vertexes[prob.map.graph.target().id]);
+                distanceToTarget[i] = prob.map.graph.vertexes[i].costToTarget;
             }
             for(GraphVertex v1: prob.map.graph.vertexes){
                 v1.adj.forEach((v2) -> {

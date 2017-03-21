@@ -26,7 +26,7 @@ public class GraphPath {
         this.costs = new LinkedList<Double>();
         GraphVertex u = path.getLast();
         while(u!=null){
-            costs.addFirst(u.cost);
+            costs.addFirst(u.costFromSource);
             u = u.from;
         }
     }
@@ -36,7 +36,7 @@ public class GraphPath {
         
         GraphVertex from = struct.source();
         from.from = null;
-        from.cost = total;
+        from.costFromSource = total;
         this.path.addLast(from);
         for(int v: codif){
             struct.vertexes[v].from = from;
@@ -44,19 +44,19 @@ public class GraphPath {
             this.path.addLast(from);
             
             total += from.costTo(from.from);
-            from.cost = total;
+            from.costFromSource = total;
         }
         struct.target().from = from;
         from = struct.target();
         this.path.addLast(from);
         total += from.costTo(from.from);
-        from.cost = total;
+        from.costFromSource = total;
         
         this.cost = total;
         this.costs = new LinkedList<Double>();
         GraphVertex u = this.path.getLast();
         while(u!=null){
-            costs.addFirst(u.cost);
+            costs.addFirst(u.costFromSource);
             u = u.from;
         }
         
