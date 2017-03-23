@@ -41,6 +41,7 @@ import ProOF.apl.advanced1.method.LocalSearch;
 import ProOF.apl.advanced1.method.MPGA;
 import ProOF.apl.advanced1.method.MultiStart;
 import ProOF.apl.advanced2.method.RFFO;
+import ProOF.apl.pog.method.OperatorTest;
 import ProOF.apl.sample1.method.SimulatedAnnealing;
 
 /**
@@ -95,6 +96,7 @@ public class fRun extends Factory<Run>{
             case 34: return new pSuluPlanner();
             case 35: return new GCILTFull();
             case 36: return new OUT();
+            case 37: return new OperatorTest(fStop.obj, fProblem.obj);
         }
         return null;
     }
