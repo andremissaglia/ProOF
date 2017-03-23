@@ -64,7 +64,7 @@ public class BlackmoreProblem extends Problem<BestSol> implements BlackmoreSyste
     protected CplexExtended cpx;
     protected oBlackmoreAvoidance avoid;
     
-    protected GraphMap map = new GraphMap();
+    public GraphMap map = new GraphMap();
     
     @Override
     public String name() {

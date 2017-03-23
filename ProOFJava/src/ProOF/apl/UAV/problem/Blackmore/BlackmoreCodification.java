@@ -10,7 +10,7 @@ import java.util.LinkedList;
  * @author marcio
  */
 public class BlackmoreCodification extends Codification<BlackmoreProblem, BlackmoreCodification> {
-    protected ArrayList<Integer> path = new ArrayList<Integer>();
+    public ArrayList<Integer> path = new ArrayList<Integer>();
     
     /** 
      * Pesos relacionados ao numero de waypoints em uma aresta.
@@ -18,7 +18,7 @@ public class BlackmoreCodification extends Codification<BlackmoreProblem, Blackm
      * Se for `null`, a atribuicao sera proporcional ao custo da aresta (para 
      * nao quebrar o codigo existente).
      */
-    protected ArrayList<Double> weights = null;
+    public ArrayList<Double> weights = null;
     
     @Override
     public void copy(BlackmoreProblem prob, BlackmoreCodification source) throws Exception {

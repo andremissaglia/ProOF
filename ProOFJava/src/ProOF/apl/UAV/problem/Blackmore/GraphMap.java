@@ -18,7 +18,7 @@ import java.util.LinkedList;
  * @author marcio
  */
 public class GraphMap {
-    protected GraphStruct graph;
+    public GraphStruct graph;
     protected GraphPath best_path;
     protected ArrayList<GraphObstacle> obstacles;
     protected ArrayList<Integer> indexes;

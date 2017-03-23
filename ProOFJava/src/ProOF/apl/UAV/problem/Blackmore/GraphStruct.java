@@ -19,7 +19,7 @@ import java.util.LinkedList;
  * @author marcio
  */
 public class GraphStruct {
-    protected final GraphVertex[] vertexes;
+    public final GraphVertex[] vertexes;
     
     public GraphStruct(BlackmoreInstance inst, ArrayList<GraphObstacle> obstacles) {
         ArrayList<GraphVertex> list = new ArrayList<GraphVertex>();
@@ -40,10 +40,10 @@ public class GraphStruct {
             }
         }
     }
-    protected final GraphVertex source(){
+    public final GraphVertex source(){
         return vertexes[0];
     }
-    protected final GraphVertex target(){
+    public final GraphVertex target(){
         return vertexes[1];
     }
     public GraphVertex min(LinkedList<GraphVertex> Q){
