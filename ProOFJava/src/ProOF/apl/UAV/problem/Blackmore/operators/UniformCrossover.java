@@ -4,7 +4,7 @@ import ProOF.apl.UAV.problem.Blackmore.BlackmoreCodification;
 import ProOF.apl.UAV.problem.Blackmore.BlackmoreProblem;
 import ProOF.gen.operator.oCrossover;
 
-public class Uniform extends oCrossover<BlackmoreProblem, BlackmoreCodification> {
+public class UniformCrossover extends oCrossover<BlackmoreProblem, BlackmoreCodification> {
 
     @Override
     public String name() {

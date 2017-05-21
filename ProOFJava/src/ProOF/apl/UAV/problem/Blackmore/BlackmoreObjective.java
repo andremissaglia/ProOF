@@ -19,7 +19,8 @@ public class BlackmoreObjective extends SingleObjective<BlackmoreProblem, Blackm
         }
         
     };
-    
+    private static long hashUses = 0;
+    private static long evaluations = 0;
     public BlackmoreObjective() throws Exception {
         super();
     }
@@ -38,6 +39,7 @@ public class BlackmoreObjective extends SingleObjective<BlackmoreProblem, Blackm
         fitness += Math.min(cost, 1e3);
         
         if(fitness<50){
+            evaluations++;
             int this_hash = codif.path.hashCode();
             if(!hash.containsKey(this_hash)){
                 prob.map.fix(prob, prob.inst, prob.unc, prob.model.delta_to_cut, codif.weights, codif.graph_path(prob), prob.model, false);
@@ -49,6 +51,7 @@ public class BlackmoreObjective extends SingleObjective<BlackmoreProblem, Blackm
                 hash.put(this_hash,fitness);
             }else{
                 fitness = hash.get(this_hash);
+                hashUses++;
             }
         }
         
@@ -61,11 +64,17 @@ public class BlackmoreObjective extends SingleObjective<BlackmoreProblem, Blackm
 
     @Override
     public void results(BlackmoreProblem prob, LinkerResults link, BlackmoreCodification codif) throws Exception {
+        link.writeLong("HashUses", hashUses);
+        link.writeDbl("HashUses%", (100.0*hashUses)/evaluations);
         hash.clear();
         evaluate(prob, codif);
         super.results(prob, link, codif);
         prob.model.results(link);
     }
     
-    
+    public static void main(String[] args) {
+        long a = 0;
+        long b = 10;
+        System.out.println(((double) a)/((double) b));
+    }
 }

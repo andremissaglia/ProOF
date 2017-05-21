@@ -73,7 +73,7 @@ public class OperatorTest extends Run {
     }
 
     private void crossover(Solution sol1, Solution sol2) throws Exception {
-        crossOperators[rnd.nextInt(mutOperators.length)].crossover(sol1, sol2);
+        crossOperators[rnd.nextInt(crossOperators.length)].crossover(sol1, sol2);
     }
 
     @Override
@@ -120,12 +120,15 @@ public class OperatorTest extends Run {
 
     @Override
     public void results(LinkerResults link) throws Exception {
+        System.out.println("------------------------ [ initializations ] ---------------");
         for (InitOperator init : initOperators) {
             init.results();
         }
+        System.out.println("------------------------ [ mutations ] ---------------------");
         for (MutOperator mut : mutOperators) {
             mut.results();
         }
+        System.out.println("------------------------ [ crossovers ] --------------------");
         for (CrossOperator c : crossOperators) {
             c.results();
         }
@@ -165,7 +168,7 @@ public class OperatorTest extends Run {
         }
 
         public void results() {
-            System.out.println(operator.name() + ":");
+            System.out.println("[ "+operator.name() + " ]:");
             System.out.println(String.format("Avg: %f", objectives.avg()));
             System.out.println(String.format("Std: %f", objectives.std()));
             System.out.println(String.format(
@@ -207,7 +210,7 @@ public class OperatorTest extends Run {
         }
 
         public void results() {
-            System.out.println(operator.name() + ":");
+            System.out.println("[ "+operator.name() + " ]:");
             System.out.println(String.format("Avg: %f", objectives.avg()));
             System.out.println(String.format("Std: %f", objectives.std()));
             System.out.println(String.format(
@@ -266,7 +269,7 @@ public class OperatorTest extends Run {
         }
 
         public void results() {
-            System.out.println(operator.name() + ":");
+            System.out.println("[ "+operator.name() + " ]:");
             System.out.println(String.format("Avg: %f", objectives.avg()));
             System.out.println(String.format("Std: %f", objectives.std()));
             System.out.println(String.format(

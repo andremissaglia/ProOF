@@ -1,18 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package ProOF.apl.UAV.problem.Blackmore;
 
-import ProOF.apl.UAV.problem.Blackmore.operators.MovExchange;
-import ProOF.apl.UAV.problem.Blackmore.operators.MutExchange;
-import ProOF.apl.UAV.problem.Blackmore.operators.RandomBestFirst;
-import ProOF.apl.UAV.problem.Blackmore.operators.RandomTour;
-import ProOF.apl.UAV.problem.Blackmore.operators.TrailCij;
-import ProOF.apl.UAV.problem.Blackmore.operators.TrailConst;
-import ProOF.apl.UAV.problem.Blackmore.operators.TrailHeuristic;
-import ProOF.apl.UAV.problem.Blackmore.operators.TrailRnd;
-import ProOF.apl.UAV.problem.Blackmore.operators.Uniform;
+import ProOF.apl.UAV.problem.Blackmore.operators.*;
 import ProOF.com.language.Factory;
 import ProOF.opt.abst.problem.meta.codification.Operator;
 import java.util.Random;
@@ -35,13 +23,20 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
         switch (index) {
             case 0: return new RandomTour();    // Initialization
             case 1: return new MutExchange();   // Mutation
-            case 2: return new Uniform();       // Crossover
+            case 2: return new UniformCrossover();       // Crossover
             case 3: return new MovExchange();   // Local movement
             case 4: return new TrailConst();    // Pheromone Trail
             case 5: return new TrailRnd();      // Pheromone Trail
             case 6: return new TrailCij();      // Pheromone Trail
             case 7: return new TrailHeuristic();// Pheromone Trail
             case 8: return new RandomBestFirst();// Pheromone Trail
+            case 9: return new CutCrossover();       // Crossover
+            case 10: return new MutDelete();       // Mutation
+            case 11: return new MutDelete2();       // Mutation
+            case 12: return new MutInsert();       // Mutation
+            case 13: return new MutPartialReinit(); // Mutation
+            case 14: return new MovInsert();        // Local movement
+            case 15: return new MovPartialReinit(); // Local movement
         }
         return null;
     }
