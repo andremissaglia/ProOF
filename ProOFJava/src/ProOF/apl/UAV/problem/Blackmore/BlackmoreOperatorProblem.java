@@ -37,6 +37,7 @@ public class BlackmoreOperatorProblem extends Factory<Operator> {
             case 13: return new MutPartialReinit(); // Mutation
             case 14: return new MovInsert();        // Local movement
             case 15: return new MovPartialReinit(); // Local movement
+            case 16: return new KSP(); // Local movement
         }
         return null;
     }
