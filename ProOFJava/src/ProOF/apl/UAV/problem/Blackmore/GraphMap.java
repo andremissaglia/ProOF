@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ProOF.apl.UAV.problem.Blackmore;
 
 import ProOF.CplexExtended.Hyperplane;
@@ -23,7 +18,7 @@ import java.util.LinkedList;
  * @author marcio
  */
 public class GraphMap {
-    protected GraphStruct graph;
+    public GraphStruct graph;
     protected GraphPath best_path;
     protected ArrayList<GraphObstacle> obstacles;
     protected ArrayList<Integer> indexes;
@@ -61,7 +56,7 @@ public class GraphMap {
         }
     }
     
-    public void fix(LinearSystem approach, BlackmoreInstance inst, pLinearStateUncertainty unc, double delta_to_cut, GraphPath graph_path, BlackmoreModel model, boolean print) throws Exception{
+    public void fix(LinearSystem approach, BlackmoreInstance inst, pLinearStateUncertainty unc, double delta_to_cut, ArrayList<Double> weights, GraphPath graph_path, BlackmoreModel model, boolean print) throws Exception{
         double cost = graph_path.cost;
         double d_cost= cost/approach.Waypoints();
 
@@ -92,15 +87,43 @@ public class GraphMap {
             System.out.println();
         }
         ArrayList<Integer> waypoints = new ArrayList<Integer>();
-        for(int i=0; i<path.length; i++){
-            int t = (int)(costs[i]/d_cost+(path.length-i)*0.99999/(path.length));
-            t = Math.max(t, 0);
-            t = Math.min(t, approach.Waypoints());
-            waypoints.add(t);
+        if(weights == null) {
+            for(int i=0; i<path.length; i++){
+                int t = (int)(costs[i]/d_cost+(path.length-i)*0.99999/(path.length));
+                t = Math.max(t, 0);
+                t = Math.min(t, approach.Waypoints());
+                waypoints.add(t);
+            }
+        } else {
+             if(print){
+                System.out.printf("weights= ");
+                for(double w : weights){
+                    System.out.printf("%s ", (int)w);
+                }
+                System.out.println();
+            }
+            double total_weight = weights.stream().reduce(0.0, Double::sum);
+            double sum = 0;
+            waypoints.add(0);
+            for(int i=0; i < weights.size(); i++){
+                double w = weights.get(i);
+                int t = (int) Math.round(approach.Waypoints()*(sum + w)/total_weight);
+                t = Math.max(t, 0);
+                t = Math.min(t, approach.Waypoints());
+                sum += w;
+                waypoints.add(t);
+            }
+            
         }
-
         correction(waypoints, costs, print);
-
+        if(print){
+            System.out.printf("waypoints= ");
+            for(int w : waypoints){
+                System.out.printf("%s ", w);
+            }
+            System.out.println();
+        }
+        
         for(int i=1; i<path.length; i++){
             int k = i-1;
             int lb = waypoints.get(k);
@@ -110,6 +133,7 @@ public class GraphMap {
             //int ub = Math.min((int)(costs[i]/d_cost+(path.length-i)*0.99999/(path.length)),approach.Waypoints());
             if(print)System.out.printf("[%d][lb;ub] = [ %2d ; %2d ]\n",i, lb, ub);
             if(lb==ub){
+                System.out.println("aaaaaaaaaa");
                 throw new Exception("lb==ub");
             }
             int j=0;

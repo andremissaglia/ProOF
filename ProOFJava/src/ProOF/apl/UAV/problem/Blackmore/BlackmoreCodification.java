@@ -1,10 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package ProOF.apl.UAV.problem.Blackmore;
 
-import ProOF.apl.UAV.abst.UAVApproach;
 import ProOF.com.Stream.StreamPrinter;
 import ProOF.opt.abst.problem.meta.codification.Codification;
 import java.util.ArrayList;
@@ -15,7 +10,16 @@ import java.util.LinkedList;
  * @author marcio
  */
 public class BlackmoreCodification extends Codification<BlackmoreProblem, BlackmoreCodification> {
-    protected ArrayList<Integer> path = new ArrayList<Integer>();
+    public ArrayList<Integer> path = new ArrayList<Integer>();
+    
+    /** 
+     * Pesos relacionados ao numero de waypoints em uma aresta.
+     * Deve ter tamanho path.length() - 1.
+     * Se for `null`, a atribuicao sera proporcional ao custo da aresta (para 
+     * nao quebrar o codigo existente).
+     */
+    public ArrayList<Double> weights = null;
+    
     @Override
     public void copy(BlackmoreProblem prob, BlackmoreCodification source) throws Exception {
         //System.arraycopy(source.path, 0, this.path, 0, this.path.size());

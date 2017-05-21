@@ -64,7 +64,7 @@ public class BlackmoreProblem extends Problem<BestSol> implements BlackmoreSyste
     protected CplexExtended cpx;
     protected oBlackmoreAvoidance avoid;
     
-    protected GraphMap map = new GraphMap();
+    public GraphMap map = new GraphMap();
     
     @Override
     public String name() {
@@ -164,6 +164,7 @@ public class BlackmoreProblem extends Problem<BestSol> implements BlackmoreSyste
             }
         }
         map.createGraph(this, inst, unc, delta.Delta());
+        map.graph.dijkstraToTarget();
     }
     
     
@@ -331,5 +332,5 @@ public class BlackmoreProblem extends Problem<BestSol> implements BlackmoreSyste
         return vehicle;
     }
 
-    
+
 }

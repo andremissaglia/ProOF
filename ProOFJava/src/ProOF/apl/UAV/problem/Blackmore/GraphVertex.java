@@ -13,12 +13,14 @@ import java.util.ArrayList;
  * @author marcio
  */
 public class GraphVertex {
-    protected final int id;
+    public final int id;
     protected final GraphObstacle obs;
     protected final Point2D point;
-    protected final ArrayList<GraphVertex> adj = new ArrayList<GraphVertex>();
-    protected double cost;
+    public final ArrayList<GraphVertex> adj = new ArrayList<GraphVertex>();
+    protected double costFromSource;
+    public double costToTarget;
     protected GraphVertex from;
+    protected GraphVertex to;
 
     public GraphVertex(int id, GraphObstacle obs, Point2D point) {
         this.id = id;
@@ -33,13 +35,16 @@ public class GraphVertex {
     protected void addEdgeTo(GraphVertex v) {
         adj.add(v);
     }
-    protected double costTo(GraphVertex v){
+    public double costTo(GraphVertex v){
         for(GraphVertex a : adj){
             if(a==v){
                 return point.distance(v.point);
             }
         }
         return Double.POSITIVE_INFINITY;
+    }
+    protected double euclidianDistance(GraphVertex v){
+        return point.distance(v.point);
     }
     
     @Override
